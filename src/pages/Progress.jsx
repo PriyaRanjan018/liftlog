@@ -67,10 +67,10 @@ export default function Progress() {
       const s = sessMap[date];
       if (dayObj.dayType === 'rest') return { day: dayObj.day, icon: '/assets/icons/icon_rest.png', status: 'rest' };
       if (dayObj.dayType === 'active_recovery') return { day: dayObj.day, icon: '/assets/icons/icon_recovery.png', status: 'recovery' };
-      if (s?.completed) return { day: dayObj.day, icon: '🔥', status: 'done' };
+      if (s?.completed) return { day: dayObj.day, icon: '/assets/icons/icon_done.png', status: 'done' };
       const today = new Date().toISOString().split('T')[0];
-      if (date < today) return { day: dayObj.day, icon: '❌', status: 'missed' };
-      return { day: dayObj.day, icon: '⬜', status: 'upcoming' };
+      if (date < today) return { day: dayObj.day, icon: '/assets/icons/icon_missed.png', status: 'missed' };
+      return { day: dayObj.day, icon: '/assets/icons/icon_upcoming.png', status: 'upcoming' };
     });
 
     // Major lift comparison (this week vs last week)
