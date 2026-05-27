@@ -1,10 +1,10 @@
 import { NavLink } from 'react-router-dom';
 
 const tabs = [
-  { to: '/', label: 'Today', icon: '/assets/icons/icon_full_body.png', id: 'nav-today' },
-  { to: '/history', label: 'History', icon: '/assets/icons/icon_history.png', id: 'nav-history' },
-  { to: '/progress', label: 'Progress', icon: '/assets/icons/icon_progress.png', id: 'nav-progress' },
-  { to: '/stats', label: 'Stats', icon: '/assets/icons/icon_stats.png', id: 'nav-stats' },
+  { to: '/', label: 'Today', icon: '/assets/icons/icon_full_body.webp', id: 'nav-today' },
+  { to: '/history', label: 'History', icon: '/assets/icons/icon_history.webp', id: 'nav-history' },
+  { to: '/progress', label: 'Progress', icon: '/assets/icons/icon_progress.webp', id: 'nav-progress' },
+  { to: '/stats', label: 'Stats', icon: '/assets/icons/icon_stats.webp', id: 'nav-stats' },
 ];
 
 export default function BottomNav() {

@@ -65,12 +65,12 @@ export default function Progress() {
     const dayStatuses = thisWeekDates.map((date, i) => {
       const dayObj = days[i] || {};
       const s = sessMap[date];
-      if (dayObj.dayType === 'rest') return { day: dayObj.day, icon: '/assets/icons/icon_rest.png', status: 'rest' };
-      if (dayObj.dayType === 'active_recovery') return { day: dayObj.day, icon: '/assets/icons/icon_recovery.png', status: 'recovery' };
-      if (s?.completed) return { day: dayObj.day, icon: '/assets/icons/icon_done.png', status: 'done' };
+      if (dayObj.dayType === 'rest') return { day: dayObj.day, icon: '/assets/icons/icon_rest.webp', status: 'rest' };
+      if (dayObj.dayType === 'active_recovery') return { day: dayObj.day, icon: '/assets/icons/icon_recovery.webp', status: 'recovery' };
+      if (s?.completed) return { day: dayObj.day, icon: '/assets/icons/icon_done.webp', status: 'done' };
       const today = new Date().toISOString().split('T')[0];
-      if (date < today) return { day: dayObj.day, icon: '/assets/icons/icon_missed.png', status: 'missed' };
-      return { day: dayObj.day, icon: '/assets/icons/icon_upcoming.png', status: 'upcoming' };
+      if (date < today) return { day: dayObj.day, icon: '/assets/icons/icon_missed.webp', status: 'missed' };
+      return { day: dayObj.day, icon: '/assets/icons/icon_upcoming.webp', status: 'upcoming' };
     });
 
     // Major lift comparison (this week vs last week)

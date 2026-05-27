@@ -7,7 +7,7 @@ export const days = [
     label: "PUSH",
     dayType: "push",
     color: "#e85d04",
-    icon: "/assets/icons/icon_push.png",
+    icon: "/assets/icons/icon_push.webp",
     focus: "Chest · Shoulders · Triceps",
     exercises: [
       { name: "Barbell Bench Press", sets: "4", reps: "5", note: "STRENGTH — go heavy", isBodyweight: false, isTimed: false },
@@ -23,7 +23,7 @@ export const days = [
     label: "REST",
     dayType: "rest",
     color: "#4a5568",
-    icon: "/assets/icons/icon_rest.png",
+    icon: "/assets/icons/icon_rest.webp",
     focus: "Full Recovery Day",
     exercises: [],
   },
@@ -32,7 +32,7 @@ export const days = [
     label: "PULL",
     dayType: "pull",
     color: "#6d28d9",
-    icon: "/assets/icons/icon_pull.png",
+    icon: "/assets/icons/icon_pull.webp",
     focus: "Back · Biceps · Rear Delts",
     exercises: [
       { name: "Deadlift", sets: "4", reps: "5", note: "STRENGTH — king of all lifts", isBodyweight: false, isTimed: false },
@@ -48,7 +48,7 @@ export const days = [
     label: "LEGS + CORE",
     dayType: "legs_core",
     color: "#059669",
-    icon: "/assets/icons/icon_legs.png",
+    icon: "/assets/icons/icon_legs.webp",
     focus: "Quads · Hamstrings · Glutes · Abs",
     exercises: [
       { name: "Barbell Back Squat", sets: "4", reps: "5", note: "STRENGTH — knees over toes", isBodyweight: false, isTimed: false },
@@ -65,7 +65,7 @@ export const days = [
     label: "FULL BODY STRENGTH",
     dayType: "full_body",
     color: "#dc2626",
-    icon: "/assets/icons/icon_full_body.png",
+    icon: "/assets/icons/icon_full_body.webp",
     focus: "Heavy Compounds + Pulling Power",
     exercises: [
       { name: "Sumo Deadlift / Trap Bar DL", sets: "3", reps: "5", note: "Heavy — different pattern", isBodyweight: false, isTimed: false },
@@ -81,7 +81,7 @@ export const days = [
     label: "ATHLETIC + FUNCTIONAL",
     dayType: "athletic",
     color: "#0ea5e9",
-    icon: "/assets/icons/icon_athletic.png",
+    icon: "/assets/icons/icon_athletic.webp",
     focus: "Explosiveness · Core · Martial Arts Prep",
     exercises: [
       { name: "Jump Squats", sets: "4", reps: "8", note: "Explosive power — same as box jumps, no box needed", isBodyweight: true, isTimed: false },
@@ -97,7 +97,7 @@ export const days = [
     label: "ACTIVE RECOVERY",
     dayType: "active_recovery",
     color: "#78716c",
-    icon: "/assets/icons/icon_recovery.png",
+    icon: "/assets/icons/icon_recovery.webp",
     focus: "Low intensity movement + flexibility",
     exercises: [],
   },
