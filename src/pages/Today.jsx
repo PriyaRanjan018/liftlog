@@ -399,7 +399,7 @@ export default function Today() {
             <button
               id="start-workout-btn"
               onClick={createSession}
-              className="w-full py-4.5 rounded-2xl font-black text-sm tracking-widest uppercase transition-all duration-300 hover:scale-[1.02] active:scale-95 text-white shadow-xl glow-orange"
+              className="w-full py-4 rounded-2xl font-black text-sm tracking-widest uppercase transition-all duration-300 hover:scale-[1.02] active:scale-95 text-white shadow-xl glow-orange"
               style={{
                 background: `linear-gradient(135deg, ${viewDay.color}, #d9480f)`,
               }}
@@ -413,7 +413,7 @@ export default function Today() {
               id="complete-workout-btn"
               onClick={completeWorkout}
               disabled={completing}
-              className="w-full py-4.5 rounded-2xl font-black text-sm tracking-widest uppercase transition-all duration-300 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:scale-100 text-white shadow-xl glow-green"
+              className="w-full py-4 rounded-2xl font-black text-sm tracking-widest uppercase transition-all duration-300 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:scale-100 text-white shadow-xl glow-green"
               style={{
                 background: 'linear-gradient(135deg, #059669, #047857)',
               }}
@@ -423,7 +423,7 @@ export default function Today() {
           )}
 
           {session?.completed && (
-            <div className="w-full py-4.5 rounded-2xl font-black text-sm tracking-widest uppercase text-center bg-[#0d1a0d] border border-[#059669]/40 text-[#059669] shadow-inner">
+            <div className="w-full py-4 rounded-2xl font-black text-sm tracking-widest uppercase text-center bg-[#0d1a0d] border border-[#059669]/40 text-[#059669] shadow-inner">
               ✅ WORKOUT COMPLETED
             </div>
           )}

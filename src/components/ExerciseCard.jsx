@@ -32,7 +32,7 @@ export default function ExerciseCard({ exercise, sessionId, color, onSetsChange 
       <button
         id={`exercise-card-${exercise.name.replace(/\s+/g, '-')}`}
         onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center gap-3.5 px-4.5 py-4 text-left focus:outline-none"
+        className="w-full flex items-center gap-3 px-4 py-4 text-left focus:outline-none"
       >
         {/* Expand indicator (modern plus/minus transition) */}
         <span
@@ -81,7 +81,7 @@ export default function ExerciseCard({ exercise, sessionId, color, onSetsChange 
 
       {/* Expanded: Set Logger */}
       {expanded && (
-        <div className="px-4.5 pb-4.5 border-t border-neutral-900 animate-fade-in">
+        <div className="px-4 pb-4 border-t border-neutral-900 animate-fade-in">
           <div className="mt-3.5 text-xs text-neutral-500 mb-4 flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-neutral-700" />
             <span>
