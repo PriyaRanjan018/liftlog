@@ -1,11 +1,11 @@
 {
-  "name": "Forge Fit",
-  "short_name": "Forge Fit",
+  "name": "LiftLog",
+  "short_name": "LiftLog",
   "icons": [
     {
-      "src": "/favicon.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
     }
   ],
   "start_url": "/",

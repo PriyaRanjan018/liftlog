@@ -1,3 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FC4C02">
-  <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM4.804 7.628l2.086 4.116h3.065L4.804 1.744 0 11.916h3.065l1.739-4.288z" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FC4C02" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#FC4C02" stop-opacity="0.05"/>
+    </linearGradient>
+    <filter id="drop-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#FC4C02" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+  
+  <!-- Base dark background -->
+  <rect width="256" height="256" fill="#060606" rx="64" />
+  
+  <!-- Gradient overlay -->
+  <rect width="256" height="256" fill="url(#bg-grad)" rx="64" />
+  
+  <!-- Subtle border -->
+  <rect width="256" height="256" fill="none" stroke="#FC4C02" stroke-width="4" stroke-opacity="0.2" rx="64" />
+  
+  <!-- Inner logo path, centered and scaled -->
+  <g transform="translate(64, 64) scale(5.333)" filter="url(#drop-shadow)">
+    <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM4.804 7.628l2.086 4.116h3.065L4.804 1.744 0 11.916h3.065l1.739-4.288z" fill="#FC4C02"/>
+  </g>
 </svg>

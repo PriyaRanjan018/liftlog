@@ -1,4 +1,4 @@
--- FitTrack — Supabase Schema
+-- LiftLog — Supabase Schema
 -- Run this in your Supabase SQL editor
 
 -- 1. Workout sessions

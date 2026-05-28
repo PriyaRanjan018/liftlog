@@ -19,7 +19,7 @@ export default function Landing() {
             <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM4.804 7.628l2.086 4.116h3.065L4.804 1.744 0 11.916h3.065l1.739-4.288z" />
           </svg>
         </div>
-        <h1 className="text-5xl font-black text-white tracking-tighter font-display mb-2 drop-shadow-md">FitTrack</h1>
+        <h1 className="text-5xl font-black text-white tracking-tighter font-display mb-2 drop-shadow-md">LiftLog</h1>
         <p className="text-neutral-400 text-sm font-medium tracking-wide">Personal Fitness Tracker</p>
       </div>
 

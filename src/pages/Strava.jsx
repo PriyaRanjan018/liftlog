@@ -450,7 +450,7 @@ export default function Strava() {
 
           <h2 className="text-2xl font-black text-white mb-2">Connect Strava</h2>
           <p className="text-neutral-500 text-sm leading-relaxed max-w-xs mb-8">
-            Link your Strava account to automatically import runs, rides, and walks into FitTrack. Your activities will appear in History and feed the Run Analysis.
+            Link your Strava account to automatically import runs, rides, and walks into LiftLog. Your activities will appear in History and feed the Run Analysis.
           </p>
 
           {/* What you get */}

@@ -1,4 +1,4 @@
--- FitTrack — Strava Integration Schema
+-- LiftLog — Strava Integration Schema
 -- Run this in your Supabase SQL editor AFTER schema.sql
 
 -- 1. Strava OAuth tokens (single-user store)
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS strava_tokens (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 2. Strava activities imported into FitTrack
+-- 2. Strava activities imported into LiftLog
 CREATE TABLE IF NOT EXISTS strava_activities (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   strava_id BIGINT NOT NULL UNIQUE,   -- Strava's own activity ID (prevents duplicate imports)

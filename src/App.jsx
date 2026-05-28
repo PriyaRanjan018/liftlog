@@ -26,7 +26,7 @@ function ViewerBanner() {
       }}
     >
       <span className="text-neutral-500">
-        👁️ Viewing Priyaranjan's FitTrack — <span className="text-white">Read Only</span>
+        👁️ Viewing Priyaranjan's LiftLog — <span className="text-white">Read Only</span>
       </span>
       <button
         onClick={logout}

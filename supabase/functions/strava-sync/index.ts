@@ -38,7 +38,7 @@ async function refreshToken(supabase: any, tokenRow: any): Promise<string> {
   return data.access_token;
 }
 
-// Maps Strava sport_type to FitTrack day_type
+// Maps Strava sport_type to LiftLog day_type
 function mapSportToDay(sportType: string): string {
   const type = sportType.toLowerCase();
   if (type.includes('run')) return 'athletic';

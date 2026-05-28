@@ -1,4 +1,4 @@
-# FitTrack — Personalized Fitness Tracker
+# LiftLog — Personalized Fitness Tracker
 
 > A **single-user, mobile-first** strength tracking web app built around a personalized 6-day training split.
 > No exercise library. No community. Just your 6 days, set logging, and progress visualization.
@@ -21,7 +21,7 @@
 
 ```bash
 git clone <your-repo>
-cd fittrack
+cd liftlog
 npm install
 ```
 

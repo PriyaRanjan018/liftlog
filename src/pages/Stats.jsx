@@ -14,8 +14,8 @@ import {
 import ChartLine from '../components/ChartLine';
 import { useAuth } from '../context/AuthContext';
 
-const CHECKLIST_KEY = 'fittrack_checklist';
-const GOAL_TYPE_KEY = 'fittrack_goal_type';
+const CHECKLIST_KEY = 'liftlog_checklist';
+const GOAL_TYPE_KEY = 'liftlog_goal_type';
 
 // Macro card configs (label, color, unit, hostel tip)
 const MACRO_META = {
@@ -72,7 +72,7 @@ export default function Stats() {
 
   // Auto-set fixed goal weight to 72 kg on mount
   useEffect(() => {
-    localStorage.setItem('fittrack_goal_weight', GOAL_WEIGHT_KG.toString());
+    localStorage.setItem('liftlog_goal_weight', GOAL_WEIGHT_KG.toString());
     loadBodyStats();
   }, []);
 
