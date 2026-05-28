@@ -13,7 +13,6 @@ export default function ExerciseCard({ exercise, sessionId, color, onSetsChange 
 
   const targetSets = parseInt(exercise.sets) || 0;
   const isBodyweight = exercise.isBodyweight;
-  const isTimed = exercise.isTimed;
 
   return (
     <div
@@ -67,14 +66,19 @@ export default function ExerciseCard({ exercise, sessionId, color, onSetsChange 
         )}
 
         {/* Type badges */}
-        {isBodyweight && (
+        {isBodyweight && exercise.type !== 'timed' && (
           <span className="flex-shrink-0 text-[8px] bg-neutral-900 border border-neutral-800 text-neutral-500 rounded-lg px-2 py-1 uppercase tracking-wider font-extrabold">
             BW
           </span>
         )}
-        {isTimed && (
+        {exercise.type === 'timed' && (
           <span className="flex-shrink-0 text-[8px] bg-neutral-900 border border-neutral-800 text-neutral-500 rounded-lg px-2 py-1 uppercase tracking-wider font-extrabold">
             ⏱
+          </span>
+        )}
+        {exercise.type === 'distance' && (
+          <span className="flex-shrink-0 text-[8px] bg-neutral-900 border border-neutral-800 text-neutral-500 rounded-lg px-2 py-1 uppercase tracking-wider font-extrabold">
+            📏
           </span>
         )}
       </button>
@@ -87,16 +91,22 @@ export default function ExerciseCard({ exercise, sessionId, color, onSetsChange 
             <span>
               Target: <strong className="text-neutral-300 font-bold">{targetSets} sets × {exercise.reps}</strong>
             </span>
-            {isBodyweight && (
+            {isBodyweight && exercise.type !== 'timed' && (
               <>
                 <span className="text-neutral-700">•</span>
                 <span className="text-neutral-400 font-medium">Bodyweight Exercise</span>
               </>
             )}
-            {isTimed && (
+            {exercise.type === 'timed' && (
               <>
                 <span className="text-neutral-700">•</span>
                 <span className="text-neutral-400 font-medium">Timed Sets</span>
+              </>
+            )}
+            {exercise.type === 'distance' && (
+              <>
+                <span className="text-neutral-700">•</span>
+                <span className="text-neutral-400 font-medium">Distance Covered</span>
               </>
             )}
           </div>

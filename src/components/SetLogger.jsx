@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 
 /**
  * SetLogger — per-exercise set logging component
- * exercise: { name, sets, reps, isBodyweight, isTimed }
+ * exercise: { name, sets, reps, isBodyweight, type }
  * sessionId: UUID of current session
  * color: day-specific accent color
  * onSetsChange: callback when sets are updated
@@ -16,8 +16,8 @@ export default function SetLogger({ exercise, sessionId, color, onSetsChange }) 
     id: null,
     set_number: num,
     weight_kg: '',
-    reps_done: exercise.reps !== 'Max' ? exercise.reps.split('-')[0] : '',
-    duration_sec: '',
+    reps_done: exercise.type !== 'timed' && exercise.reps !== 'Max' ? parseInt(exercise.reps) || '' : '',
+    duration_sec: exercise.type === 'timed' ? parseInt(exercise.reps) || '' : '',
     is_completed: false,
     isSaving: false,
   });
@@ -58,9 +58,9 @@ export default function SetLogger({ exercise, sessionId, color, onSetsChange }) 
         session_id: sessionId,
         exercise_name: exercise.name,
         set_number: row.set_number,
-        weight_kg: exercise.isBodyweight ? null : parseFloat(row.weight_kg) || null,
-        reps_done: exercise.isTimed ? null : parseInt(row.reps_done) || null,
-        duration_sec: exercise.isTimed ? parseInt(row.duration_sec) || null : null,
+        weight_kg: exercise.isBodyweight || exercise.type === 'timed' ? null : parseFloat(row.weight_kg) || null,
+        reps_done: exercise.type === 'timed' ? null : parseInt(row.reps_done) || null,
+        duration_sec: exercise.type === 'timed' ? parseInt(row.duration_sec) || null : null,
         is_completed: row.is_completed,
       };
 
@@ -152,8 +152,8 @@ export default function SetLogger({ exercise, sessionId, color, onSetsChange }) 
             Set {row.set_number}
           </span>
 
-          {/* Weight field (if not bodyweight) */}
-          {!exercise.isBodyweight && (
+          {/* Weight field (if not bodyweight and not timed) */}
+          {!exercise.isBodyweight && exercise.type !== 'timed' && (
             <div className="flex items-center gap-2">
               <input
                 id={`weight-${exercise.name}-${i}`}
@@ -175,7 +175,7 @@ export default function SetLogger({ exercise, sessionId, color, onSetsChange }) 
 
           {/* Reps/Duration field */}
           <div className="flex items-center gap-2 flex-1">
-            {exercise.isTimed ? (
+            {exercise.type === 'timed' ? (
               <input
                 id={`dur-${exercise.name}-${i}`}
                 type="number"
@@ -207,7 +207,7 @@ export default function SetLogger({ exercise, sessionId, color, onSetsChange }) 
               />
             )}
             <span className="text-neutral-500 text-xs font-bold uppercase tracking-wider">
-              {exercise.isTimed ? 'sec' : 'reps'}
+              {exercise.type === 'timed' ? 'sec' : exercise.type === 'distance' ? 'm' : 'reps'}
             </span>
           </div>
 
