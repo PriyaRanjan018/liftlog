@@ -5,6 +5,7 @@ const tabs = [
   { to: '/history', label: 'History', icon: '/assets/icons/icon_history.webp', id: 'nav-history' },
   { to: '/progress', label: 'Progress', icon: '/assets/icons/icon_progress.webp', id: 'nav-progress' },
   { to: '/stats', label: 'Stats', icon: '/assets/icons/icon_stats.webp', id: 'nav-stats' },
+  { to: '/strava', label: 'Strava', icon: null, stravaIcon: true, id: 'nav-strava' },
 ];
 
 export default function BottomNav() {
@@ -27,11 +28,22 @@ export default function BottomNav() {
           >
             {({ isActive }) => (
               <>
-                <img 
-                  src={tab.icon} 
-                  alt={tab.label}
-                  className={`w-6 h-6 object-contain transition-transform duration-300 ${isActive ? '-translate-y-0.5 filter drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]' : 'opacity-60 grayscale'}`} 
-                />
+                {tab.stravaIcon ? (
+                  <svg
+                    className={`w-6 h-6 transition-all duration-300 ${isActive ? '-translate-y-0.5' : 'opacity-40'}`}
+                    viewBox="0 0 24 24"
+                    fill={isActive ? '#FC4C02' : 'white'}
+                    style={isActive ? { filter: 'drop-shadow(0 0 8px rgba(252,76,2,0.6))' } : {}}
+                  >
+                    <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zM4.804 7.628l2.086 4.116h3.065L4.804 1.744 0 11.916h3.065l1.739-4.288z" />
+                  </svg>
+                ) : (
+                  <img
+                    src={tab.icon}
+                    alt={tab.label}
+                    className={`w-6 h-6 object-contain transition-transform duration-300 ${isActive ? '-translate-y-0.5 filter drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]' : 'opacity-60 grayscale'}`}
+                  />
+                )}
                 <span className="font-extrabold">{tab.label}</span>
                 
                 {isActive && (

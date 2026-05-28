@@ -4,6 +4,8 @@ import Today from './pages/Today';
 import History from './pages/History';
 import Progress from './pages/Progress';
 import Stats from './pages/Stats';
+import Strava from './pages/Strava';
+import StravaCallback from './pages/StravaCallback';
 
 export default function App() {
   return (
@@ -14,6 +16,8 @@ export default function App() {
           <Route path="/history" element={<History />} />
           <Route path="/progress" element={<Progress />} />
           <Route path="/stats" element={<Stats />} />
+          <Route path="/strava" element={<Strava />} />
+          <Route path="/strava/callback" element={<StravaCallback />} />
         </Routes>
         <BottomNav />
       </div>
