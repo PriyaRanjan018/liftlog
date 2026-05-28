@@ -167,7 +167,7 @@ export default function SetLogger({ exercise, sessionId, color, onSetsChange }) 
                     ? 'border-transparent text-neutral-500 bg-[#0e0e0e]/50' 
                     : 'border-neutral-800 text-white focus:border-[#e85d04] focus:ring-1 focus:ring-[#e85d04]/20'
                 }`}
-                disabled={row.is_completed}
+                disabled={row.is_completed || !sessionId}
               />
               <span className="text-[#333] text-xs font-bold font-display">×</span>
             </div>
@@ -188,7 +188,7 @@ export default function SetLogger({ exercise, sessionId, color, onSetsChange }) 
                     ? 'border-transparent text-neutral-500 bg-[#0e0e0e]/50' 
                     : 'border-neutral-800 text-white focus:border-[#e85d04]'
                 }`}
-                disabled={row.is_completed}
+                disabled={row.is_completed || !sessionId}
               />
             ) : (
               <input
@@ -203,7 +203,7 @@ export default function SetLogger({ exercise, sessionId, color, onSetsChange }) 
                     ? 'border-transparent text-neutral-500 bg-[#0e0e0e]/50' 
                     : 'border-neutral-800 text-white focus:border-[#e85d04]'
                 }`}
-                disabled={row.is_completed}
+                disabled={row.is_completed || !sessionId}
               />
             )}
             <span className="text-neutral-500 text-xs font-bold uppercase tracking-wider">
@@ -221,6 +221,7 @@ export default function SetLogger({ exercise, sessionId, color, onSetsChange }) 
                 : 'bg-neutral-900 border border-neutral-800 text-[#444] hover:bg-neutral-800 hover:text-neutral-300'
             }`}
             aria-label={row.is_completed ? 'Mark set incomplete' : 'Mark set complete'}
+            disabled={!sessionId}
           >
             ✓
           </button>
@@ -228,13 +229,15 @@ export default function SetLogger({ exercise, sessionId, color, onSetsChange }) 
       ))}
 
       {/* Add Set button */}
-      <button
-        id={`add-set-${exercise.name}`}
-        onClick={addSet}
-        className="w-full py-2.5 rounded-2xl border border-dashed border-neutral-800 text-neutral-500 text-xs font-bold uppercase tracking-widest hover:border-neutral-700 hover:text-neutral-300 transition-all duration-200 mt-2"
-      >
-        + Add Extra Set
-      </button>
+      {sessionId && (
+        <button
+          id={`add-set-${exercise.name}`}
+          onClick={addSet}
+          className="w-full py-2.5 rounded-2xl border border-dashed border-neutral-800 text-neutral-500 text-xs font-bold uppercase tracking-widest hover:border-neutral-700 hover:text-neutral-300 transition-all duration-200 mt-2"
+        >
+          + Add Extra Set
+        </button>
+      )}
     </div>
   );
 }

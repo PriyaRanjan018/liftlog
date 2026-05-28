@@ -12,6 +12,7 @@ import {
   GOAL_TYPES,
 } from '../lib/macros';
 import ChartLine from '../components/ChartLine';
+import { useAuth } from '../context/AuthContext';
 
 const CHECKLIST_KEY = 'fittrack_checklist';
 const GOAL_TYPE_KEY = 'fittrack_goal_type';
@@ -49,6 +50,7 @@ const MACRO_META = {
 };
 
 export default function Stats() {
+  const { isViewer } = useAuth();
   const [bodyStats, setBodyStats] = useState([]);
   const [weightInput, setWeightInput] = useState('');
   const [saving, setSaving] = useState(false);
@@ -95,6 +97,7 @@ export default function Stats() {
   };
 
   const logWeight = async () => {
+    if (isViewer) return;
     if (!weightInput || isNaN(parseFloat(weightInput))) return;
     setSaving(true);
 
@@ -112,6 +115,7 @@ export default function Stats() {
   };
 
   const switchGoalType = (key) => {
+    if (isViewer) return;
     setGoalType(key);
     localStorage.setItem(GOAL_TYPE_KEY, key);
     setToast(`Goal switched to ${GOAL_TYPES[key].label}`);
@@ -119,6 +123,7 @@ export default function Stats() {
   };
 
   const toggleCheck = (id) => {
+    if (isViewer) return;
     const updated = { ...checklist, [id]: !checklist[id] };
     setChecklist(updated);
     localStorage.setItem(
@@ -264,12 +269,13 @@ export default function Stats() {
               value={weightInput}
               onChange={(e) => setWeightInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && logWeight()}
-              className="flex-1 bg-[#0a0a0a] border border-neutral-900 rounded-2xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-sky-500 transition-all font-bold"
+              disabled={saving || isViewer}
+              className="flex-1 bg-[#0a0a0a] border border-neutral-900 rounded-2xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-sky-500 transition-all font-bold disabled:opacity-50"
             />
             <button
               id="log-weight-btn"
               onClick={logWeight}
-              disabled={saving}
+              disabled={saving || isViewer}
               className="px-5 py-3.5 bg-sky-500 hover:bg-sky-600 text-white font-black text-xs uppercase tracking-wider rounded-2xl transition-all active:scale-95 disabled:opacity-50 shrink-0"
             >
               {saving ? '...' : 'Log'}

@@ -3,6 +3,7 @@ import { getDayForDate, getDayIndex, days } from '../data/split';
 import { supabase } from '../lib/supabase';
 import { calculateStreak, checkAndUpdatePRs } from '../lib/calculations';
 import ExerciseCard from '../components/ExerciseCard';
+import { useAuth } from '../context/AuthContext';
 
 // Array of motivating training quotes to inspire the user
 const MOTIVATIONAL_QUOTES = [
@@ -33,6 +34,7 @@ function Toast({ message, onDone }) {
 }
 
 export default function Today() {
+  const { isViewer } = useAuth();
   const todayData = getDayForDate();
   const todayIdx = getDayIndex();
   const todayStr = new Date().toISOString().split('T')[0];
@@ -284,7 +286,7 @@ export default function Today() {
   }
 
   // WORKOUT DAY screen
-  const isReadOnly = !isToday;
+  const isReadOnly = !isToday || isViewer;
 
   return (
     <div
@@ -393,7 +395,7 @@ export default function Today() {
       </div>
 
       {/* Complete workout CTA */}
-      {isToday && (
+      {isToday && !isViewer && (
         <div className="px-5 mt-8">
           {!session && !sessionLoading && (
             <button

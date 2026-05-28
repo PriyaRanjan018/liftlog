@@ -38,11 +38,11 @@ function ViewerBanner() {
   );
 }
 
-// Guard: redirect /today to /progress for viewers
+// Guard: remove redirection, just render Today
 function TodayGuard() {
   const { isOwner, isViewer } = useAuth();
-  if (isViewer) return <Navigate to="/progress" replace />;
-  if (!isOwner) return <Navigate to="/" replace />;
+  // Viewers are allowed now, they just see it read-only
+  if (!isOwner && !isViewer) return <Navigate to="/" replace />;
   return <Today />;
 }
 

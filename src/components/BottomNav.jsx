@@ -1,11 +1,9 @@
 // src/components/BottomNav.jsx
-// Viewer mode: hides "Today" tab (write-gated screen)
 
 import { NavLink } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 
 const ALL_TABS = [
-  { to: '/', label: 'Today', icon: '/assets/icons/icon_full_body.webp', id: 'nav-today', ownerOnly: true },
+  { to: '/', label: 'Today', icon: '/assets/icons/icon_full_body.webp', id: 'nav-today' },
   { to: '/history', label: 'History', icon: '/assets/icons/icon_history.webp', id: 'nav-history' },
   { to: '/progress', label: 'Progress', icon: '/assets/icons/icon_progress.webp', id: 'nav-progress' },
   { to: '/stats', label: 'Stats', icon: '/assets/icons/icon_stats.webp', id: 'nav-stats' },
@@ -13,10 +11,7 @@ const ALL_TABS = [
 ];
 
 export default function BottomNav() {
-  const { isViewer } = useAuth();
-
-  // In viewer mode, hide the Today (workout logger) tab
-  const tabs = isViewer ? ALL_TABS.filter((t) => !t.ownerOnly) : ALL_TABS;
+  const tabs = ALL_TABS;
 
   return (
     <nav className="fixed bottom-4 left-4 right-4 z-50 max-w-md mx-auto rounded-3xl bg-black/60 backdrop-blur-xl border border-white/5 shadow-2xl safe-bottom overflow-hidden">

@@ -1,19 +1,10 @@
 // src/pages/Landing.jsx
-// The first screen anyone sees — two buttons: VIEW PROGRESS (public) or MY DASHBOARD (owner fingerprint)
+// The first screen anyone sees — two buttons: VIEW PROGRESS (public) or SIGN IN WITH GOOGLE (owner login)
 
-import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Landing() {
-  const { enterViewerMode, attemptLogin, loginError, hasPasskey } = useAuth();
-  const [submitting, setSubmitting] = useState(false);
-
-  const handleFingerprintLogin = async () => {
-    if (submitting) return;
-    setSubmitting(true);
-    await attemptLogin();
-    setSubmitting(false);
-  };
+  const { enterViewerMode, loginWithGoogle, loginError } = useAuth();
 
   return (
     <div className="min-h-screen bg-[#060606] flex flex-col items-center justify-center px-6 relative overflow-hidden">
@@ -34,7 +25,7 @@ export default function Landing() {
 
       {/* Two main buttons */}
       <div className="w-full max-w-sm space-y-4 relative z-10">
-        {/* VIEW PROGRESS — public */}
+        {/* VIEW PROGRESS — public, no password */}
         <button
           id="view-progress-btn"
           onClick={enterViewerMode}
@@ -45,27 +36,25 @@ export default function Landing() {
           <span className="ml-auto text-[10px] text-neutral-500 font-bold uppercase tracking-widest bg-neutral-900 px-2 py-1 rounded-lg">Public</span>
         </button>
 
-        {/* MY DASHBOARD — owner fingerprint login */}
+        {/* MY DASHBOARD — owner login via Google */}
         <button
           id="my-dashboard-btn"
-          onClick={handleFingerprintLogin}
-          disabled={submitting}
-          className="w-full py-5 rounded-[20px] font-black text-base tracking-wide transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] text-white flex items-center justify-center gap-3 shadow-xl disabled:opacity-50"
+          onClick={loginWithGoogle}
+          className="w-full py-5 rounded-[20px] font-black text-base tracking-wide transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] text-white flex items-center justify-center gap-3 shadow-xl"
           style={{
             background: 'linear-gradient(135deg, rgba(252,76,2,0.15), rgba(232,64,0,0.08))',
             border: '1px solid rgba(252,76,2,0.25)',
             boxShadow: '0 0 40px rgba(252,76,2,0.1)',
           }}
         >
-          <span className="text-xl">☝️</span>
-          <span>{submitting ? 'Verifying...' : hasPasskey ? 'Use Fingerprint' : 'Register Fingerprint'}</span>
+          <span className="text-xl">🔐</span>
+          <span>Sign in with Google</span>
           <span className="ml-auto text-[10px] text-[#FC4C02]/80 font-bold uppercase tracking-widest bg-[#FC4C02]/10 px-2 py-1 rounded-lg">Owner</span>
         </button>
       </div>
-
-      {/* Error message */}
+      
       {loginError && (
-        <p className="mt-4 text-red-400 text-xs font-bold text-center px-2 leading-snug relative z-10">
+        <p className="mt-6 text-red-400 text-[11px] font-bold text-center px-4 leading-snug relative z-10 bg-red-500/10 py-2 rounded-lg border border-red-500/20 max-w-xs mx-auto">
           {loginError}
         </p>
       )}
