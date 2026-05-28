@@ -115,6 +115,13 @@
     animation: pulseGlow 3s infinite ease-in-out;
   }
 
+  @keyframes shimmer {
+    100% { transform: translateX(100%); }
+  }
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+  }
+
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
