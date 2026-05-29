@@ -46,6 +46,8 @@ function buildExerciseList(dayData, trainingWeek) {
   const pu = getPullUpVariation(trainingWeek);
 
   return dayData.exercises.map((ex) => {
+    // Deadlift slot on Wednesday (Pull day — main strength deadlift)
+    if (ex.name === "Deadlift") return dl;
     // Deadlift slot on Friday (Full Body)
     if (ex.name === "Sumo Deadlift / Trap Bar DL") return dl;
     // RDL slot on Thursday (Legs+Core)
