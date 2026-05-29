@@ -1,6 +1,8 @@
 // src/lib/strava.js
 // Frontend helpers for Strava OAuth & Supabase Edge Function calls
 
+import { supabase } from './supabase';
+
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const STRAVA_CLIENT_ID = import.meta.env.VITE_STRAVA_CLIENT_ID;
@@ -22,13 +24,19 @@ export function redirectToStrava() {
 }
 
 // ─── Edge Function caller helper ──────────────────────────────────────────
+// Uses the active Google OAuth session token so the Edge Function
+// gets a valid JWT — NOT the anon key (which is not a user JWT)
 async function callEdgeFunction(fnName, body = {}) {
+  // Get the current user session — this has the real JWT
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token ?? SUPABASE_ANON_KEY;
+
   const res = await fetch(`${SUPABASE_URL}/functions/v1/${fnName}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(body),
   });
