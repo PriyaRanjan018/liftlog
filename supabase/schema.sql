@@ -46,11 +46,21 @@ CREATE TABLE IF NOT EXISTS personal_records (
   session_id UUID REFERENCES workout_sessions(id)
 );
 
+-- 5. Progression tracking — counted training weeks only
+CREATE TABLE IF NOT EXISTS progression_weeks (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  calendar_week_start DATE NOT NULL UNIQUE,  -- Monday of that week
+  week_number INTEGER NOT NULL,              -- 1, 2, 3... (counted training weeks only)
+  has_completion BOOLEAN DEFAULT false,      -- true if at least 1 workout completed that week
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_sessions_date ON workout_sessions(session_date);
 CREATE INDEX IF NOT EXISTS idx_sets_session ON exercise_sets(session_id);
 CREATE INDEX IF NOT EXISTS idx_sets_exercise ON exercise_sets(exercise_name);
 CREATE INDEX IF NOT EXISTS idx_body_stats_date ON body_stats(logged_date);
+CREATE INDEX IF NOT EXISTS idx_progression_week ON progression_weeks(calendar_week_start);
 
 -- Row Level Security (for single user — disable or set up auth as needed)
 ALTER TABLE workout_sessions ENABLE ROW LEVEL SECURITY;

@@ -4,6 +4,7 @@ import { getWeekDates } from '../lib/calculations';
 import { days, MAJOR_LIFTS } from '../data/split';
 import ProgressBar from '../components/ProgressBar';
 import ChartLine from '../components/ChartLine';
+import { getCurrentTrainingWeek, getDeadliftVariation, getPullUpVariation, getStageColor } from '../lib/progression';
 import {
   BarChart,
   Bar,
@@ -15,7 +16,7 @@ import {
 } from 'recharts';
 
 export default function Progress() {
-  const [view, setView] = useState('week'); // 'week' | 'month'
+  const [view, setView] = useState('week');
   const [weekData, setWeekData] = useState(null);
   const [liftData, setLiftData] = useState({});
   const [personalRecords, setPersonalRecords] = useState([]);
@@ -23,11 +24,13 @@ export default function Progress() {
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [exerciseHistory, setExerciseHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [trainingWeek, setTrainingWeek] = useState(1);
 
   useEffect(() => {
     loadWeekData();
     loadPersonalRecords();
     loadMonthlyVolume();
+    getCurrentTrainingWeek().then(setTrainingWeek);
   }, []);
 
   useEffect(() => {
@@ -227,6 +230,86 @@ export default function Progress() {
               <div className="text-center text-neutral-500 py-8 text-xs font-bold uppercase tracking-wider">Loading metrics...</div>
             ) : (
               <>
+                {/* ─── PROGRESSION TRACKER ─── */}
+                {(() => {
+                  const dl = getDeadliftVariation(trainingWeek);
+                  const pu = getPullUpVariation(trainingWeek);
+                  const paths = [
+                    {
+                      label: 'DEADLIFT PATH',
+                      ex: dl,
+                      nextLabel: dl._progression.unlockWeek
+                        ? `Week ${dl._progression.unlockWeek} (${dl._progression.unlockWeek - trainingWeek} week${dl._progression.unlockWeek - trainingWeek !== 1 ? 's' : ''} away)`
+                        : 'Max stage reached 🏆',
+                    },
+                    {
+                      label: 'PULL-UP PATH',
+                      ex: pu,
+                      nextLabel: pu._progression.unlockWeek
+                        ? `Week ${pu._progression.unlockWeek} (${pu._progression.unlockWeek - trainingWeek} week${pu._progression.unlockWeek - trainingWeek !== 1 ? 's' : ''} away)`
+                        : 'Max stage reached 🏆',
+                    },
+                  ];
+                  return (
+                    <div className="bg-[#121212] border border-neutral-900 rounded-3xl p-5 shadow-sm">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="text-[10px] font-black text-neutral-500 tracking-widest uppercase">
+                          My Progression Tracker
+                        </div>
+                        <div className="text-[9px] font-black px-2 py-1 rounded-lg bg-neutral-900 text-neutral-400 border border-neutral-800 uppercase tracking-wider">
+                          Week {trainingWeek}
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        {paths.map(({ label, ex, nextLabel }) => {
+                          const p = ex._progression;
+                          const color = getStageColor(p.stage, p.totalStages);
+                          const pct = Math.round((p.stage / p.totalStages) * 100);
+                          const isMaxed = p.stage === p.totalStages;
+                          return (
+                            <div key={label} className="border-b border-neutral-900 last:border-0 pb-4 last:pb-0">
+                              <div className="text-[9px] font-black text-neutral-500 uppercase tracking-widest mb-2">{label}</div>
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="text-sm font-extrabold text-white">{ex.name}</div>
+                                <span
+                                  className="text-[9px] font-black px-2 py-0.5 rounded-lg uppercase tracking-wider"
+                                  style={{ color, backgroundColor: `${color}15`, border: `1px solid ${color}30` }}
+                                >
+                                  Stage {p.stage}/{p.totalStages}
+                                </span>
+                              </div>
+                              <div className="w-full h-2 bg-neutral-950 rounded-full overflow-hidden border border-neutral-900 mb-1.5">
+                                <div
+                                  className="h-full rounded-full transition-all duration-700"
+                                  style={{
+                                    width: `${pct}%`,
+                                    background: `linear-gradient(90deg, ${color}70, ${color})`,
+                                    boxShadow: `0 0 8px ${color}40`,
+                                  }}
+                                />
+                              </div>
+                              <div className="flex justify-between text-[9px] font-bold">
+                                <span style={{ color }}>{p.stageLabel}</span>
+                                {!isMaxed && (
+                                  <span className="text-neutral-600">Next unlock: {nextLabel}</span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <div className="mt-4 pt-4 border-t border-neutral-900 flex items-center gap-2">
+                        <span className="text-lg">📅</span>
+                        <p className="text-[10px] text-neutral-500 leading-relaxed">
+                          Training weeks count only when you tap <strong className="text-neutral-300">Complete Workout</strong>. Skipped weeks don't advance your stage.
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 {/* Weekly completion */}
                 <div className="bg-[#121212] border border-neutral-900 rounded-3xl p-5 shadow-sm">
                   <div className="text-[10px] font-black text-neutral-500 tracking-widest uppercase mb-4">

@@ -121,3 +121,24 @@ CREATE POLICY "No direct write - strava_activities"
   ON strava_activities FOR INSERT
   WITH CHECK (false); -- Only Edge Functions (service_role) can insert
 
+
+-- ─── 6. RLS Policies for progression_weeks ────────────────────────────────
+
+ALTER TABLE progression_weeks ENABLE ROW LEVEL SECURITY;
+
+-- Anyone can read progression data (viewer mode shows progression tracker)
+DROP POLICY IF EXISTS "Public read - progression_weeks" ON progression_weeks;
+CREATE POLICY "Public read - progression_weeks"
+  ON progression_weeks FOR SELECT USING (true);
+
+-- Only owner can insert new training weeks
+DROP POLICY IF EXISTS "Owner write - progression_weeks" ON progression_weeks;
+CREATE POLICY "Owner write - progression_weeks"
+  ON progression_weeks FOR INSERT
+  WITH CHECK (auth.jwt() ->> 'email' = 'priyaranjanpradhan005@gmail.com');
+
+-- Only owner can update (mark has_completion = true)
+DROP POLICY IF EXISTS "Owner update - progression_weeks" ON progression_weeks;
+CREATE POLICY "Owner update - progression_weeks"
+  ON progression_weeks FOR UPDATE
+  USING (auth.jwt() ->> 'email' = 'priyaranjanpradhan005@gmail.com');

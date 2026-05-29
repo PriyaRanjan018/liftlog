@@ -4,6 +4,12 @@ import { supabase } from '../lib/supabase';
 import { calculateStreak, checkAndUpdatePRs } from '../lib/calculations';
 import ExerciseCard from '../components/ExerciseCard';
 import { useAuth } from '../context/AuthContext';
+import {
+  getCurrentTrainingWeek,
+  recordProgressionWeek,
+  getDeadliftVariation,
+  getPullUpVariation,
+} from '../lib/progression';
 
 // Array of motivating training quotes to inspire the user
 const MOTIVATIONAL_QUOTES = [
@@ -33,6 +39,25 @@ function Toast({ message, onDone }) {
   );
 }
 
+// ─── Build exercise list with progression substitutions ────────────────────
+// Replaces Deadlift, RDL, and Pull-up slots with progression-aware variants
+function buildExerciseList(dayData, trainingWeek) {
+  const dl = getDeadliftVariation(trainingWeek);
+  const pu = getPullUpVariation(trainingWeek);
+
+  return dayData.exercises.map((ex) => {
+    // Deadlift slot on Friday (Full Body)
+    if (ex.name === "Sumo Deadlift / Trap Bar DL") return dl;
+    // RDL slot on Thursday (Legs+Core)
+    if (ex.name === "Romanian Deadlift (RDL)") return dl;
+    // Pull-up slot on Wednesday (Pull)
+    if (ex.name === "Pull-ups / Lat Pulldown") return pu;
+    // Pull-up slot on Friday (Full Body)
+    if (ex.name === "Pull-ups (weighted if possible)") return pu;
+    return ex;
+  });
+}
+
 export default function Today() {
   const { isViewer } = useAuth();
   const todayData = getDayForDate();
@@ -51,6 +76,7 @@ export default function Today() {
   const [toast, setToast] = useState(null);
   const [sessionSets, setSessionSets] = useState([]);
   const [dailyQuote, setDailyQuote] = useState('');
+  const [trainingWeek, setTrainingWeek] = useState(1);
 
   // Touch swipe handling
   const touchStartX = useRef(null);
@@ -59,7 +85,7 @@ export default function Today() {
   useEffect(() => {
     if (isToday) loadTodaySession();
     calculateStreak().then(setStreak);
-    // Pick a quote based on current day of month so it's consistent all day
+    getCurrentTrainingWeek().then(setTrainingWeek);
     const dayOfMonth = new Date().getDate();
     setDailyQuote(MOTIVATIONAL_QUOTES[dayOfMonth % MOTIVATIONAL_QUOTES.length]);
   }, [viewIdx]);
@@ -113,10 +139,29 @@ export default function Today() {
 
     setSession((s) => ({ ...s, completed: true }));
 
+    // Record progression week — check if a new stage just unlocked
+    const prevWeek = trainingWeek;
+    const { isNewWeek, weekNumber } = await recordProgressionWeek();
+    if (isNewWeek) {
+      setTrainingWeek(weekNumber);
+      // Check if deadlift or pull-up unlocked a new stage
+      const prevDL = getDeadliftVariation(prevWeek);
+      const newDL  = getDeadliftVariation(weekNumber);
+      const prevPU = getPullUpVariation(prevWeek);
+      const newPU  = getPullUpVariation(weekNumber);
+      if (newDL.name !== prevDL.name) {
+        setTimeout(() => setToast(`🔓 Deadlift Unlocked — You're ready for ${newDL.name}!`), 1500);
+      } else if (newPU.name !== prevPU.name) {
+        setTimeout(() => setToast(`🔓 Pull-up Unlocked — You're ready for ${newPU.name}!`), 1500);
+      }
+    }
+
     if (newPRs.length > 0) {
       setToast(`NEW PR! ${newPRs[0].exerciseName}: ${newPRs[0].weight}kg × ${newPRs[0].reps}`);
-    } else {
+    } else if (!isNewWeek) {
       setToast('Workout completed! Keep building!');
+    } else {
+      setToast(`📅 Training Week ${weekNumber} unlocked!`);
     }
 
     calculateStreak().then(setStreak);
@@ -370,7 +415,7 @@ export default function Today() {
         {viewDay.exercises.length === 0 ? (
           <div className="text-center text-neutral-500 py-8">No exercises today</div>
         ) : (
-          viewDay.exercises.map((exercise) => (
+          buildExerciseList(viewDay, trainingWeek).map((exercise) => (
             <ExerciseCard
               key={exercise.name}
               exercise={exercise}

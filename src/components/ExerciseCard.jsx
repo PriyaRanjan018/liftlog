@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import SetLogger from './SetLogger';
+import { getStageColor } from '../lib/progression';
 
 /**
  * ExerciseCard — expandable exercise card with set logger
@@ -47,6 +48,35 @@ export default function ExerciseCard({ exercise, sessionId, color, onSetsChange 
             <span>💡</span>
             <span className="truncate">{exercise.note}</span>
           </div>
+          {/* Progression badge */}
+          {exercise._progression && (() => {
+            const p = exercise._progression;
+            const stageColor = getStageColor(p.stage, p.totalStages);
+            const pct = Math.round((p.stage / p.totalStages) * 100);
+            const isMaxed = p.stage === p.totalStages;
+            return (
+              <div className="mt-2.5 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: stageColor }}>
+                    {isMaxed ? '🔓 UNLOCKED' : `🔄 Stage ${p.stage} of ${p.totalStages}`} — {p.stageLabel}
+                  </span>
+                  <span className="text-[9px] font-bold text-neutral-600">
+                    {p.unlockWeek ? `Week ${p.unlockWeek - 1} → ${p.unlockWeek}` : 'Max Stage'}
+                  </span>
+                </div>
+                <div className="w-full h-1.5 bg-neutral-900 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{
+                      width: `${pct}%`,
+                      background: `linear-gradient(90deg, ${stageColor}80, ${stageColor})`,
+                      boxShadow: `0 0 6px ${stageColor}50`,
+                    }}
+                  />
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Sets × Reps badge */}
