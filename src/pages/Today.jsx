@@ -382,26 +382,40 @@ export default function Today() {
                 <p className="text-xs text-neutral-500 mb-3 leading-relaxed">
                   Select the day you missed. Its full workout will load below — log your sets normally.
                 </p>
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-3 overflow-x-auto no-scrollbar pb-4 pt-2 -mx-5 px-5 snap-x">
                   {workoutDays.map(d => (
                     <button
                       key={d.day}
                       id={`makeup-day-${d.day}`}
                       onClick={() => { setMakeupDay(d); setMakeupSession(null); }}
-                      className={`flex flex-col items-center px-4 py-3 rounded-2xl border transition-all duration-200 ${
+                      className={`relative flex-none flex flex-col items-center justify-center w-[76px] h-[88px] rounded-2xl border transition-all duration-300 snap-center ${
                         makeupDay?.day === d.day
-                          ? 'border-white/20 scale-105 shadow-lg'
-                          : 'border-neutral-800 bg-neutral-950 opacity-60 hover:opacity-90'
+                          ? 'scale-105 shadow-xl z-10'
+                          : 'border-neutral-800/80 bg-neutral-900/50 opacity-60 hover:opacity-100'
                       }`}
                       style={makeupDay?.day === d.day ? {
-                        borderColor: `${d.color}40`,
-                        backgroundColor: `${d.color}12`,
-                        boxShadow: `0 4px 20px ${d.color}20`,
+                        borderColor: `${d.color}50`,
+                        backgroundColor: `${d.color}15`,
+                        boxShadow: `0 8px 24px ${d.color}25`,
                       } : {}}
                     >
-                      <img src={d.icon} alt={d.day} className="w-7 h-7 mb-1 object-contain" />
-                      <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: makeupDay?.day === d.day ? d.color : '#666' }}>{d.day}</span>
-                      <span className="text-[8px] text-neutral-600 mt-0.5">{d.label}</span>
+                      {/* Inner glow effect for active item */}
+                      {makeupDay?.day === d.day && (
+                        <div className="absolute inset-0 rounded-2xl opacity-20 blur-md pointer-events-none" style={{ backgroundColor: d.color }} />
+                      )}
+                      
+                      <img 
+                        src={d.icon} 
+                        alt={d.day} 
+                        className="w-6 h-6 mb-1.5 object-contain z-10 transition-transform duration-300" 
+                        style={{ transform: makeupDay?.day === d.day ? 'scale(1.1)' : 'scale(1)' }} 
+                      />
+                      <span className="text-[10px] font-black uppercase tracking-widest z-10" style={{ color: makeupDay?.day === d.day ? d.color : '#888' }}>
+                        {d.day}
+                      </span>
+                      <span className="text-[8px] font-bold text-neutral-500 mt-0.5 z-10 uppercase tracking-wider text-center px-1 leading-tight">
+                        {d.label}
+                      </span>
                     </button>
                   ))}
                 </div>
