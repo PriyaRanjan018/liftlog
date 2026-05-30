@@ -366,7 +366,7 @@ export default function Today() {
         </div>
 
         {/* ─── MAKEUP SESSION SECTION ─── */}
-        {!isViewer && (
+        {isToday && !isViewer && (
           <div className="px-5 pt-6">
             {/* Section header */}
             <div className="flex items-center gap-2 mb-3">
