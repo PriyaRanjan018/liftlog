@@ -80,6 +80,12 @@ export default function Today() {
   const [dailyQuote, setDailyQuote] = useState('');
   const [trainingWeek, setTrainingWeek] = useState(1);
 
+  // Makeup session state (Sunday use-a-missed-day feature)
+  const [makeupDay, setMakeupDay] = useState(null);
+  const [makeupSession, setMakeupSession] = useState(null);
+  const [makeupCompleting, setMakeupCompleting] = useState(false);
+  const workoutDays = days.filter(d => !['rest', 'active_recovery'].includes(d.dayType));
+
   // Touch swipe handling
   const touchStartX = useRef(null);
   const containerRef = useRef(null);
@@ -178,24 +184,64 @@ export default function Today() {
     if (!confirmReset) return;
 
     try {
-      // 1. Delete personal records achieved in this session
       await supabase.from('personal_records').delete().eq('session_id', session.id);
-      
-      // 2. Delete the session (cascades to exercise_sets)
       await supabase.from('workout_sessions').delete().eq('id', session.id);
-      
-      // 3. Reset local states
       setSession(null);
       setSessionSets([]);
       setToast('Workout reset successfully!');
-      
-      // 4. Recalculate streak
       const newStreak = await calculateStreak();
       setStreak(newStreak);
     } catch (err) {
       console.error('Error resetting session:', err);
       alert('Failed to reset session. Please try again.');
     }
+  };
+
+  // ─── Makeup session functions ────────────────────────────────────────────
+  const createMakeupSession = async () => {
+    if (makeupSession) return;
+    const { data } = await supabase
+      .from('workout_sessions')
+      .insert({
+        session_date: todayStr,
+        day_type: makeupDay.dayType,
+        completed: false,
+        notes: `💪 Makeup — ${makeupDay.label} (${makeupDay.day})`,
+      })
+      .select('*')
+      .single();
+    setMakeupSession(data);
+  };
+
+  const completeMakeupWorkout = async () => {
+    if (!makeupSession) return;
+    setMakeupCompleting(true);
+    const { data: sets } = await supabase
+      .from('exercise_sets').select('*').eq('session_id', makeupSession.id);
+    const newPRs = await checkAndUpdatePRs(makeupSession.id, sets || []);
+    await supabase.from('workout_sessions')
+      .update({ completed: true, completed_at: new Date().toISOString() })
+      .eq('id', makeupSession.id);
+    setMakeupSession(s => ({ ...s, completed: true }));
+    const { weekNumber } = await recordProgressionWeek();
+    setTrainingWeek(weekNumber);
+    if (newPRs.length > 0) {
+      setToast(`NEW PR! ${newPRs[0].exerciseName}: ${newPRs[0].weight}kg × ${newPRs[0].reps}`);
+    } else {
+      setToast('💪 Makeup session complete! Back on track.');
+    }
+    calculateStreak().then(setStreak);
+    setMakeupCompleting(false);
+  };
+
+  const resetMakeupSession = async () => {
+    if (!makeupSession) return;
+    const ok = window.confirm('Delete this makeup session and all sets?');
+    if (!ok) return;
+    await supabase.from('personal_records').delete().eq('session_id', makeupSession.id);
+    await supabase.from('workout_sessions').delete().eq('id', makeupSession.id);
+    setMakeupSession(null);
+    setToast('Makeup session reset.');
   };
 
   // Touch swipe handlers
@@ -272,41 +318,36 @@ export default function Today() {
     );
   }
 
-  // ACTIVE RECOVERY screen
+  // ACTIVE RECOVERY / SUNDAY screen
   if (viewDay.dayType === 'active_recovery') {
+    const makeupExercises = makeupDay ? buildExerciseList(makeupDay, trainingWeek) : [];
     return (
-      <div 
+      <div
         ref={containerRef}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        className="min-h-screen bg-[#060606] flex flex-col items-center justify-between pb-32 pt-12 px-6 relative overflow-hidden"
+        className="min-h-screen bg-[#060606] pb-32"
       >
-        {/* Soft atmospheric gradient behind */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-72 h-72 bg-[#78716c]/10 rounded-full blur-[100px] pointer-events-none animate-pulse-glow" />
-
         {toast && <Toast message={toast} onDone={() => setToast(null)} />}
-        
-        <div className="w-full max-w-md">
-          <div className="flex items-center justify-between mb-8">
+
+        {/* Header */}
+        <div className="px-5 pt-12 pb-6 border-b border-neutral-900/60">
+          <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-1.5 bg-neutral-900/60 backdrop-blur-md border border-neutral-800/80 rounded-2xl px-3.5 py-2">
               <span>🔥</span>
               <span className="font-extrabold text-white text-sm">{streak}</span>
               <span className="text-[#666] text-xs">day streak</span>
             </div>
-            <span className="text-[10px] bg-neutral-900 border border-neutral-800 text-neutral-400 px-3 py-1.5 rounded-xl uppercase font-bold tracking-widest">
-              Recovery
-            </span>
+            <span className="text-[10px] bg-neutral-900 border border-neutral-800 text-neutral-400 px-3 py-1.5 rounded-xl uppercase font-bold tracking-widest">Recovery</span>
           </div>
-
           <DaySwiper viewIdx={viewIdx} setViewIdx={setViewIdx} todayIdx={todayIdx} />
         </div>
 
-        <div className="text-center my-auto py-8 animate-fade-in w-full max-w-sm">
-          <div className="text-7xl mb-6 filter drop-shadow-[0_10px_15px_rgba(120,113,108,0.3)]">🚶</div>
-          <h1 className="text-3xl font-black tracking-tight text-white mb-2 font-display">ACTIVE RECOVERY</h1>
-          <p className="text-[#a8a29e] text-xs font-bold tracking-wider uppercase mb-8">Mobility & Aerobic base · {viewDay.day}</p>
-          
-          <div className="glass-card rounded-3xl p-6 text-left space-y-4 shadow-xl">
+        {/* Recovery tips */}
+        <div className="px-5 pt-6">
+          <div className="text-[10px] font-black text-neutral-500 tracking-widest uppercase mb-3">Active Recovery</div>
+          <div className="bg-[#121212] border border-neutral-900 rounded-3xl p-5 space-y-4">
             {[
               { icon: '🏃', title: 'Aerobic Flush', text: '30-40 min light jog (Zone 2) — fat burning & aerobic capacity.' },
               { icon: '🧘', title: 'Static Stretch', text: '20 min full body: hamstrings, hips, and chest openers.' },
@@ -324,8 +365,128 @@ export default function Today() {
           </div>
         </div>
 
-        {/* Motivational quote footer */}
-        <div className="text-center max-w-xs text-xs text-neutral-500 italic px-4 mt-4">
+        {/* ─── MAKEUP SESSION SECTION ─── */}
+        {!isViewer && (
+          <div className="px-5 pt-6">
+            {/* Section header */}
+            <div className="flex items-center gap-2 mb-3">
+              <div className="text-[10px] font-black text-neutral-500 tracking-widest uppercase">
+                💪 Missed a session?
+              </div>
+              <div className="flex-1 h-px bg-neutral-900" />
+            </div>
+
+            {/* Day picker — only if no makeup session started */}
+            {!makeupSession && (
+              <>
+                <p className="text-xs text-neutral-500 mb-3 leading-relaxed">
+                  Select the day you missed. Its full workout will load below — log your sets normally.
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  {workoutDays.map(d => (
+                    <button
+                      key={d.day}
+                      id={`makeup-day-${d.day}`}
+                      onClick={() => { setMakeupDay(d); setMakeupSession(null); }}
+                      className={`flex flex-col items-center px-4 py-3 rounded-2xl border transition-all duration-200 ${
+                        makeupDay?.day === d.day
+                          ? 'border-white/20 scale-105 shadow-lg'
+                          : 'border-neutral-800 bg-neutral-950 opacity-60 hover:opacity-90'
+                      }`}
+                      style={makeupDay?.day === d.day ? {
+                        borderColor: `${d.color}40`,
+                        backgroundColor: `${d.color}12`,
+                        boxShadow: `0 4px 20px ${d.color}20`,
+                      } : {}}
+                    >
+                      <img src={d.icon} alt={d.day} className="w-7 h-7 mb-1 object-contain" />
+                      <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: makeupDay?.day === d.day ? d.color : '#666' }}>{d.day}</span>
+                      <span className="text-[8px] text-neutral-600 mt-0.5">{d.label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Start button */}
+                {makeupDay && (
+                  <button
+                    id="start-makeup-btn"
+                    onClick={createMakeupSession}
+                    className="w-full mt-4 py-4 rounded-2xl font-black text-sm tracking-widest uppercase text-white shadow-xl transition-all hover:scale-[1.02] active:scale-95"
+                    style={{ background: `linear-gradient(135deg, ${makeupDay.color}, ${makeupDay.color}aa)` }}
+                  >
+                    START {makeupDay.day} — {makeupDay.label}
+                  </button>
+                )}
+              </>
+            )}
+
+            {/* Makeup workout in progress */}
+            {makeupDay && makeupSession && (
+              <div className="mt-2">
+                {/* Day header */}
+                <div
+                  className="rounded-2xl px-4 py-3 mb-4 flex items-center gap-3"
+                  style={{ background: `${makeupDay.color}15`, border: `1px solid ${makeupDay.color}30` }}
+                >
+                  <img src={makeupDay.icon} alt={makeupDay.day} className="w-8 h-8 object-contain" />
+                  <div>
+                    <div className="text-[9px] font-black uppercase tracking-widest" style={{ color: makeupDay.color }}>{makeupDay.day} — MAKEUP</div>
+                    <div className="text-white font-extrabold text-sm">{makeupDay.label}</div>
+                    <div className="text-neutral-500 text-[10px]">{makeupDay.focus}</div>
+                  </div>
+                  <button
+                    onClick={() => { setMakeupDay(null); setMakeupSession(null); }}
+                    className="ml-auto text-neutral-600 hover:text-neutral-300 text-xs font-bold"
+                  >
+                    ✕ Change
+                  </button>
+                </div>
+
+                {/* Exercise cards */}
+                <div className="space-y-3">
+                  {makeupExercises.map(ex => (
+                    <ExerciseCard
+                      key={ex.name}
+                      exercise={ex}
+                      sessionId={makeupSession.completed ? null : makeupSession.id}
+                      color={makeupDay.color}
+                      onSetsChange={setSessionSets}
+                    />
+                  ))}
+                </div>
+
+                {/* Complete / Reset buttons */}
+                <div className="mt-6 space-y-3">
+                  {!makeupSession.completed ? (
+                    <button
+                      id="complete-makeup-btn"
+                      onClick={completeMakeupWorkout}
+                      disabled={makeupCompleting}
+                      className="w-full py-4 rounded-2xl font-black text-sm tracking-widest uppercase text-white shadow-xl transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 glow-green"
+                      style={{ background: 'linear-gradient(135deg, #059669, #047857)' }}
+                    >
+                      {makeupCompleting ? 'SAVING...' : '✓ COMPLETE MAKEUP WORKOUT'}
+                    </button>
+                  ) : (
+                    <div className="w-full py-4 rounded-2xl font-black text-sm tracking-widest uppercase text-center bg-[#0d1a0d] border border-[#059669]/40 text-[#059669]">
+                      ✅ MAKEUP COMPLETE — BACK ON TRACK
+                    </div>
+                  )}
+                  {!makeupSession.completed && (
+                    <button
+                      onClick={resetMakeupSession}
+                      className="w-full py-3 rounded-2xl border border-red-500/20 text-red-500/70 text-xs font-black tracking-widest uppercase transition-all hover:bg-red-950/20"
+                    >
+                      Reset Makeup Session
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="text-center max-w-xs text-xs text-neutral-600 italic px-4 mt-8 mx-auto">
           "Discipline is doing what needs to be done, even when you don't want to."
         </div>
       </div>
