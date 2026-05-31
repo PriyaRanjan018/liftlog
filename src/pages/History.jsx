@@ -221,55 +221,6 @@ export default function History() {
           </div>
         )}
 
-        {/* Recent sessions tracker */}
-        <div>
-          <h2 className="text-[10px] font-black text-neutral-500 tracking-widest uppercase mb-3.5 px-1">
-            Recent Training Runs
-          </h2>
-
-          {loading ? (
-            <div className="text-center text-neutral-500 py-8 text-xs font-bold uppercase tracking-wider">Loading history...</div>
-          ) : recentSessions.length === 0 ? (
-            <div className="text-center text-neutral-500 py-8 text-xs font-bold uppercase tracking-wider">
-              No recorded sessions. Log a workout to start!
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {recentSessions.map((s) => {
-                const dayInfo = getDayInfo(s.day_type);
-                return (
-                  <button
-                    key={s.id}
-                    id={`session-${s.id}`}
-                    onClick={() => handleDayClick(s.session_date)}
-                    className="w-full bg-[#121212] border border-neutral-900/80 rounded-2xl p-4 flex items-center gap-4 hover:border-neutral-800 transition-all duration-200 text-left"
-                  >
-                    <img src={dayInfo.icon} alt={dayInfo.label} className="w-8 h-8 object-contain filter drop-shadow-md" />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider leading-none mb-1.5">
-                        {formatDate(s.session_date)}
-                      </div>
-                      <div className="font-extrabold text-sm tracking-tight" style={{ color: dayInfo.color }}>
-                        {dayInfo.label}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      {s.completed ? (
-                        <span className="text-[9px] bg-[#0d1a0d] border border-[#059669]/30 text-[#059669] rounded-xl px-2.5 py-1 font-black uppercase tracking-wider">
-                          ✓ Cleared
-                        </span>
-                      ) : (
-                        <span className="text-[9px] bg-[#1a1a0d] border border-amber-500/30 text-amber-500 rounded-xl px-2.5 py-1 font-black uppercase tracking-wider">
-                          Active
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );
