@@ -86,8 +86,6 @@ export default function Today() {
   const [makeupCompleting, setMakeupCompleting] = useState(false);
   const workoutDays = days.filter(d => !['rest', 'active_recovery'].includes(d.dayType));
 
-  // Touch swipe handling
-  const touchStartX = useRef(null);
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -244,27 +242,13 @@ export default function Today() {
     setToast('Makeup session reset.');
   };
 
-  // Touch swipe handlers
-  const handleTouchStart = (e) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-  const handleTouchEnd = (e) => {
-    if (touchStartX.current === null) return;
-    const dx = e.changedTouches[0].clientX - touchStartX.current;
-    if (Math.abs(dx) > 50) {
-      if (dx < 0) setViewIdx((i) => (i + 1) % 7);
-      else setViewIdx((i) => (i - 1 + 7) % 7);
-    }
-    touchStartX.current = null;
-  };
+
 
   // REST day screen
   if (viewDay.dayType === 'rest') {
     return (
       <div 
         ref={containerRef}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
         className="min-h-screen bg-[#060606] flex flex-col items-center justify-between pb-32 pt-12 px-6 relative overflow-hidden"
       >
         {/* Soft atmospheric gradient behind */}
@@ -324,8 +308,6 @@ export default function Today() {
     return (
       <div
         ref={containerRef}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
         className="min-h-screen bg-[#060606] pb-32"
       >
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-72 h-72 bg-[#78716c]/10 rounded-full blur-[100px] pointer-events-none animate-pulse-glow" />
@@ -514,8 +496,6 @@ export default function Today() {
     <div
       ref={containerRef}
       className="min-h-screen bg-[#060606] pb-32"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
     >
       {toast && <Toast message={toast} onDone={() => setToast(null)} />}
 
