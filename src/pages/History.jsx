@@ -46,11 +46,12 @@ export default function History() {
       return;
     }
 
-    // Load sets
+    // Load sets — only confirmed (ticked) sets
     const { data: sets } = await supabase
       .from('exercise_sets')
       .select('*')
       .eq('session_id', session.id)
+      .eq('is_completed', true)
       .order('exercise_name')
       .order('set_number');
 

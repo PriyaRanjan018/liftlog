@@ -47,6 +47,7 @@ export default function SetLogger({
       .select('*')
       .eq('session_id', sessionId)
       .eq('exercise_name', exercise.name)
+      .eq('is_completed', true)           // only load explicitly confirmed sets
       .order('set_number')
       .then(({ data }) => {
         if (data && data.length > 0) {
@@ -143,7 +144,7 @@ export default function SetLogger({
       const updated = prev.map((r, i) =>
         i === index ? { ...r, [field]: value } : r
       );
-      setTimeout(() => saveRow(updated[index]), 300);
+      // No auto-save on typing — only save when user ticks ✓ (lockSet)
       if (onSetsChange) onSetsChange(updated);
       return updated;
     });
