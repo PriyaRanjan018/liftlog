@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SetLogger from './SetLogger';
 import { getStageColor } from '../lib/progression';
+import { supabase } from '../lib/supabase';
 
 /**
  * ExerciseCard — expandable exercise card with set logger
@@ -11,21 +12,48 @@ import { getStageColor } from '../lib/progression';
  */
 export default function ExerciseCard({ exercise, sessionId, color, onSetsChange }) {
   const [expanded, setExpanded] = useState(false);
+  const [exerciseLocked, setExerciseLocked] = useState(false);
 
   const targetSets = parseInt(exercise.sets) || 0;
   const isBodyweight = exercise.isBodyweight;
 
+  // Check if this exercise is already marked complete in DB (resume after refresh)
+  useEffect(() => {
+    if (!sessionId) return;
+    supabase
+      .from('exercise_completions')
+      .select('id')
+      .eq('session_id', sessionId)
+      .eq('exercise_name', exercise.name)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setExerciseLocked(true);
+      });
+  }, [sessionId, exercise.name]);
+
+  const handleExerciseComplete = async (exerciseName) => {
+    if (!sessionId) return;
+    await supabase.from('exercise_completions').upsert(
+      { session_id: sessionId, exercise_name: exerciseName, completed_at: new Date().toISOString() },
+      { onConflict: 'session_id,exercise_name' }
+    );
+    setExerciseLocked(true);
+    setExpanded(false); // collapse after locking
+  };
+
   return (
     <div
       className={`rounded-2xl border transition-all duration-300 overflow-hidden ${
-        expanded 
-          ? 'shadow-lg border-neutral-800' 
+        exerciseLocked
+          ? 'bg-[#0a160a] border-[#059669]/30 shadow-sm'
+          : expanded
+          ? 'shadow-lg border-neutral-800'
           : 'bg-[#121212]/90 border-[#1e1e1e] hover:border-neutral-800/80 hover:bg-[#151515]'
       }`}
       style={{
-        boxShadow: expanded ? `0 10px 30px -10px ${color}10` : 'none',
-        backgroundColor: expanded ? '#161616' : undefined,
-        borderColor: expanded ? `${color}35` : undefined,
+        boxShadow: expanded && !exerciseLocked ? `0 10px 30px -10px ${color}10` : 'none',
+        backgroundColor: exerciseLocked ? '#0a160a' : expanded ? '#161616' : undefined,
+        borderColor: exerciseLocked ? '#05966940' : expanded ? `${color}35` : undefined,
       }}
     >
       {/* Header row — tap to expand */}
@@ -34,22 +62,31 @@ export default function ExerciseCard({ exercise, sessionId, color, onSetsChange 
         onClick={() => setExpanded((v) => !v)}
         className="w-full flex items-center gap-3 px-4 py-4 text-left focus:outline-none"
       >
-        {/* Expand indicator (modern plus/minus transition) */}
+        {/* Expand indicator */}
         <span
-          className="text-[#666] transition-transform duration-300 font-bold text-xs w-4 h-4 flex items-center justify-center bg-neutral-900 border border-neutral-800 rounded-full"
-          style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)', color: expanded ? color : undefined }}
+          className="text-[#666] transition-transform duration-300 font-bold text-xs w-4 h-4 flex items-center justify-center bg-neutral-900 border border-neutral-800 rounded-full shrink-0"
+          style={{
+            transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)',
+            color: exerciseLocked ? '#059669' : expanded ? color : undefined,
+            borderColor: exerciseLocked ? '#05966940' : undefined,
+          }}
         >
-          {expanded ? '−' : '＋'}
+          {exerciseLocked ? '🔒' : expanded ? '−' : '＋'}
         </span>
 
         <div className="flex-1 min-w-0">
-          <div className="font-extrabold text-[15px] text-white tracking-tight">{exercise.name}</div>
+          <div
+            className="font-extrabold text-[15px] tracking-tight"
+            style={{ color: exerciseLocked ? '#059669' : 'white' }}
+          >
+            {exercise.name}
+          </div>
           <div className="text-xs text-neutral-500 mt-1 flex items-center gap-1 truncate">
             <span>💡</span>
-            <span className="truncate">{exercise.note}</span>
+            <span className="truncate">{exerciseLocked ? 'Completed & locked ✓' : exercise.note}</span>
           </div>
           {/* Progression badge */}
-          {exercise._progression && (() => {
+          {!exerciseLocked && exercise._progression && (() => {
             const p = exercise._progression;
             const stageColor = getStageColor(p.stage, p.totalStages);
             const pct = Math.round((p.stage / p.totalStages) * 100);
@@ -84,9 +121,9 @@ export default function ExerciseCard({ exercise, sessionId, color, onSetsChange 
           <div
             className="flex-shrink-0 px-2.5 py-1 rounded-xl text-xs font-black border tracking-wide"
             style={{
-              background: `${color}10`,
-              borderColor: `${color}25`,
-              color: color,
+              background: exerciseLocked ? '#05966912' : `${color}10`,
+              borderColor: exerciseLocked ? '#05966930' : `${color}25`,
+              color: exerciseLocked ? '#059669' : color,
             }}
           >
             {exercise.sets}
@@ -116,35 +153,39 @@ export default function ExerciseCard({ exercise, sessionId, color, onSetsChange 
       {/* Expanded: Set Logger */}
       {expanded && (
         <div className="px-4 pb-4 border-t border-neutral-900 animate-fade-in">
-          <div className="mt-3.5 text-xs text-neutral-500 mb-4 flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-neutral-700" />
-            <span>
-              Target: <strong className="text-neutral-300 font-bold">{targetSets} sets × {exercise.reps}</strong>
-            </span>
-            {isBodyweight && exercise.type !== 'timed' && (
-              <>
-                <span className="text-neutral-700">•</span>
-                <span className="text-neutral-400 font-medium">Bodyweight Exercise</span>
-              </>
-            )}
-            {exercise.type === 'timed' && (
-              <>
-                <span className="text-neutral-700">•</span>
-                <span className="text-neutral-400 font-medium">Timed Sets</span>
-              </>
-            )}
-            {exercise.type === 'distance' && (
-              <>
-                <span className="text-neutral-700">•</span>
-                <span className="text-neutral-400 font-medium">Distance Covered</span>
-              </>
-            )}
-          </div>
+          {!exerciseLocked && (
+            <div className="mt-3.5 text-xs text-neutral-500 mb-4 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-neutral-700" />
+              <span>
+                Target: <strong className="text-neutral-300 font-bold">{targetSets} sets × {exercise.reps}</strong>
+              </span>
+              {isBodyweight && exercise.type !== 'timed' && (
+                <>
+                  <span className="text-neutral-700">•</span>
+                  <span className="text-neutral-400 font-medium">Bodyweight Exercise</span>
+                </>
+              )}
+              {exercise.type === 'timed' && (
+                <>
+                  <span className="text-neutral-700">•</span>
+                  <span className="text-neutral-400 font-medium">Timed Sets</span>
+                </>
+              )}
+              {exercise.type === 'distance' && (
+                <>
+                  <span className="text-neutral-700">•</span>
+                  <span className="text-neutral-400 font-medium">Distance Covered</span>
+                </>
+              )}
+            </div>
+          )}
           <SetLogger
             exercise={exercise}
             sessionId={sessionId}
             color={color}
             onSetsChange={onSetsChange}
+            onExerciseComplete={handleExerciseComplete}
+            exerciseLocked={exerciseLocked}
           />
         </div>
       )}

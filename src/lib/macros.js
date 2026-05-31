@@ -10,7 +10,7 @@
 export const GOAL_WEIGHT_KG = 72;
 
 /** Starting baseline */
-export const STARTING_WEIGHT_KG = 65;
+export const STARTING_WEIGHT_KG = 66;
 
 /**
  * Goal type definitions with formulas and display metadata.
