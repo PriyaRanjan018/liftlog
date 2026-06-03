@@ -148,3 +148,93 @@ export function getStageColor(stage, totalStages) {
   if (pct <= 0.75) return '#0ea5e9'; // blue
   return '#059669';                   // green — fully unlocked
 }
+
+// ─── Training Phase System ───────────────────────────────────────────────────
+// Phase 1: Week  1–16  (Month  1–4)  — Foundation
+// Phase 2: Week 17–36  (Month  5–9)  — Building
+// Phase 3: Week 37–72  (Month 10–18) — MA Ready
+//
+// A "training week" increments only when you click Complete Workout.
+// Missed weeks do NOT advance the phase.
+export function getTrainingPhase(weekNumber) {
+  if (weekNumber <= 16) {
+    return {
+      phase: 1,
+      label: 'Foundation',
+      emoji: '🏗️',
+      color: '#e85d04',
+      monthRange: 'Month 1–4',
+      weekRange: 'Week 1–16',
+      phaseWeek: weekNumber,
+      totalWeeks: 16,
+      description: 'Learn movement patterns. Build connective tissue. No conventional deadlift.',
+      exercises: [
+        { name: 'Goblet Squat',           note: 'Learning squat pattern safely with dumbbell' },
+        { name: 'Romanian Deadlift (RDL)', note: 'Hip hinge school — 20–30kg only' },
+        { name: 'Hip Thrust',             note: 'Posterior chain without spine loading' },
+        { name: 'Lat Pulldown',           note: 'Building toward bodyweight pull-ups' },
+        { name: 'Farmer\'s Carry',        note: 'Grip + core + traps in one movement' },
+        { name: 'Dead Bug',               note: 'Anti-extension core — MA-specific pattern' },
+      ],
+      milestones: [
+        { week: 3,  text: 'Deadlift path → Barbell RDL unlocks' },
+        { week: 5,  text: 'Deadlift path → Conventional Deadlift unlocks' },
+        { week: 6,  text: 'Pull-up path → Full bodyweight pull-ups unlock' },
+        { week: 16, text: 'Phase 2 unlocks — Barbell Back Squat + heavy lifts' },
+      ],
+      nextPhase: 'Phase 2 — Building (Week 17)',
+    };
+  } else if (weekNumber <= 36) {
+    return {
+      phase: 2,
+      label: 'Building',
+      emoji: '⚒️',
+      color: '#0ea5e9',
+      monthRange: 'Month 5–9',
+      weekRange: 'Week 17–36',
+      phaseWeek: weekNumber - 16,
+      totalWeeks: 20,
+      description: 'Progressive overload. Barbell Back Squat. Deadlift. Weighted pull-ups.',
+      exercises: [
+        { name: 'Barbell Back Squat',        note: 'Replaces Goblet Squat — add 2.5kg/week' },
+        { name: 'Conventional Deadlift',     note: '3×5 — progress every session from 50kg' },
+        { name: 'Weighted Pull-ups',         note: 'Belt + plates when you hit 10 clean reps' },
+        { name: 'Bulgarian Split Squat',     note: 'Added — single-leg power for MA footwork' },
+        { name: 'Bent-Over Barbell Row',     note: 'Heavier loads — thick back development' },
+      ],
+      milestones: [
+        { week: 4,  text: 'Squat target: 1× bodyweight (66 kg)' },
+        { week: 10, text: 'Deadlift target: 1.2× bodyweight (~80 kg)' },
+        { week: 14, text: 'Bench target: 0.8× bodyweight (~55 kg)' },
+        { week: 20, text: 'Pull-ups target: 10 clean reps — Phase 3 unlocks' },
+      ],
+      nextPhase: 'Phase 3 — MA Ready (Week 37)',
+    };
+  } else {
+    return {
+      phase: 3,
+      label: 'MA Ready',
+      emoji: '🥋',
+      color: '#10b981',
+      monthRange: 'Month 10–18',
+      weekRange: 'Week 37–72',
+      phaseWeek: weekNumber - 36,
+      totalWeeks: 36,
+      description: 'Fight conditioning. Explosive power. Walk into MA classes prepared.',
+      exercises: [
+        { name: 'Trap Bar / Sumo Deadlift',  note: 'Power generation — sport-specific hinge' },
+        { name: 'Bulgarian Split Squat',      note: 'Single-leg power for footwork + takedowns' },
+        { name: 'Weighted Pull-ups',          note: 'Heavy — back dominance and grip' },
+        { name: 'Conditioning Rounds',        note: '3×3 min HIIT — sparring simulation' },
+        { name: 'Grip Training',              note: 'Dedicated session — clinch and control' },
+      ],
+      milestones: [
+        { week: 12, text: 'Ready to start MA classes' },
+        { week: 20, text: '5km sub-30 min cardio' },
+        { week: 28, text: 'Squat 100kg target' },
+        { week: 36, text: 'Deadlift 120kg — MA Foundation complete' },
+      ],
+      nextPhase: null,
+    };
+  }
+}

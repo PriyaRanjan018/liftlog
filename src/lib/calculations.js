@@ -14,9 +14,12 @@ export function calculateVolume(sets) {
 }
 
 /**
- * Calculate weekly completion streak.
- * A streak day = completed session OR it was a rest/active_recovery day.
- * Break only on days where user should have trained but didn't log.
+ * Calculate gym workout streak.
+ * RULES:
+ *  - Only TRAINING days count (dayType not rest/active_recovery).
+ *  - Rest and active_recovery days are silently skipped — neutral.
+ *  - If a past training day has no completed session → streak resets to 0.
+ *  - Today's training day not yet completed does NOT break the streak (grace period).
  */
 export async function calculateStreak() {
   const { data: sessions } = await supabase
@@ -24,10 +27,8 @@ export async function calculateStreak() {
     .select('session_date, day_type, completed')
     .order('session_date', { ascending: false });
 
-  if (!sessions || sessions.length === 0) return 0;
-
   const sessionMap = {};
-  sessions.forEach((s) => {
+  (sessions || []).forEach((s) => {
     sessionMap[s.session_date] = s;
   });
 
@@ -39,23 +40,25 @@ export async function calculateStreak() {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
     const dateStr = d.toISOString().split('T')[0];
-    const jsDay = d.getDay(); // 0=Sun
+    const jsDay = d.getDay();
     const dayMap = { 0: 6, 1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5 };
     const dayData = days[dayMap[jsDay]];
 
+    // Rest and active recovery — skip silently, don't count, don't break
     if (dayData.dayType === 'rest' || dayData.dayType === 'active_recovery') {
-      // Rest days don't break streak
-      streak++;
       continue;
     }
 
+    // Training day
     const session = sessionMap[dateStr];
+    if (i === 0 && (!session || !session.completed)) {
+      // Today: if not yet completed, give grace — don't break streak
+      continue;
+    }
     if (session && session.completed) {
       streak++;
-    } else if (i === 0) {
-      // Today hasn't been completed yet — don't break streak for today
-      continue;
     } else {
+      // Skipped a training day — hard reset to 0
       break;
     }
   }

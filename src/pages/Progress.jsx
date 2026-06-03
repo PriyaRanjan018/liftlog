@@ -4,7 +4,7 @@ import { getWeekDates } from '../lib/calculations';
 import { days, MAJOR_LIFTS } from '../data/split';
 import ProgressBar from '../components/ProgressBar';
 import ChartLine from '../components/ChartLine';
-import { getCurrentTrainingWeek, getDeadliftVariation, getPullUpVariation, getStageColor } from '../lib/progression';
+import { getCurrentTrainingWeek, getDeadliftVariation, getPullUpVariation, getStageColor, getTrainingPhase } from '../lib/progression';
 import {
   BarChart,
   Bar,
@@ -25,12 +25,16 @@ export default function Progress() {
   const [exerciseHistory, setExerciseHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [trainingWeek, setTrainingWeek] = useState(1);
+  const [phaseData, setPhaseData] = useState(null);
 
   useEffect(() => {
     loadWeekData();
     loadPersonalRecords();
     loadMonthlyVolume();
-    getCurrentTrainingWeek().then(setTrainingWeek);
+    getCurrentTrainingWeek().then((w) => {
+      setTrainingWeek(w);
+      setPhaseData(getTrainingPhase(w));
+    });
   }, []);
 
   useEffect(() => {
@@ -226,6 +230,139 @@ export default function Progress() {
         {/* WEEK VIEW */}
         {view === 'week' && (
           <>
+            {/* ─── PHASE OVERVIEW CARD ─── */}
+            {phaseData && (
+              <div
+                className="rounded-3xl p-5 shadow-sm relative overflow-hidden"
+                style={{ background: '#121212', border: '1px solid #1a1a1a' }}
+              >
+                {/* Ambient glow */}
+                <div
+                  className="absolute top-0 right-0 w-48 h-48 rounded-full blur-[80px] pointer-events-none opacity-20"
+                  style={{ backgroundColor: phaseData.color }}
+                />
+
+                {/* Header row */}
+                <div className="flex items-start justify-between mb-4 relative z-10">
+                  <div>
+                    <div className="text-[10px] font-black text-neutral-500 tracking-widest uppercase mb-1">18-Month MA Roadmap</div>
+                    <div className="text-xl font-black text-white flex items-center gap-2">
+                      <span>{phaseData.emoji}</span>
+                      <span>Phase {phaseData.phase} — {phaseData.label}</span>
+                    </div>
+                    <div className="text-[10px] text-neutral-500 mt-0.5 font-medium">{phaseData.monthRange} · {phaseData.weekRange}</div>
+                  </div>
+                  <div
+                    className="text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-wider shrink-0"
+                    style={{ color: phaseData.color, backgroundColor: `${phaseData.color}15`, border: `1px solid ${phaseData.color}30` }}
+                  >
+                    Wk {phaseData.phaseWeek}/{phaseData.totalWeeks}
+                  </div>
+                </div>
+
+                {/* Phase progress bar */}
+                <div className="relative z-10 mb-4">
+                  <div className="flex justify-between text-[9px] font-bold mb-1.5">
+                    <span style={{ color: phaseData.color }}>{Math.round((phaseData.phaseWeek / phaseData.totalWeeks) * 100)}% of phase complete</span>
+                    <span className="text-neutral-600">{phaseData.totalWeeks - phaseData.phaseWeek} weeks remaining</span>
+                  </div>
+                  <div className="w-full h-2 bg-black/60 rounded-full overflow-hidden border border-white/5">
+                    <div
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{
+                        width: `${Math.min((phaseData.phaseWeek / phaseData.totalWeeks) * 100, 100)}%`,
+                        background: `linear-gradient(90deg, ${phaseData.color}70, ${phaseData.color})`,
+                        boxShadow: `0 0 10px ${phaseData.color}60`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Description */}
+                <p className="text-[10px] text-neutral-400 leading-relaxed mb-4 relative z-10 italic">
+                  {phaseData.description}
+                </p>
+
+                {/* Phase 3-step mini-map */}
+                <div className="flex items-center gap-1 mb-5 relative z-10">
+                  {[1, 2, 3].map((p) => {
+                    const labels = ['Foundation', 'Building', 'MA Ready'];
+                    const emojis = ['🏗️', '⚒️', '🥋'];
+                    const colors = ['#e85d04', '#0ea5e9', '#10b981'];
+                    const isDone = p < phaseData.phase;
+                    const isCurrent = p === phaseData.phase;
+                    return (
+                      <>
+                        <div
+                          key={p}
+                          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all"
+                          style={{
+                            backgroundColor: isCurrent ? `${colors[p-1]}15` : isDone ? 'rgba(255,255,255,0.03)' : 'transparent',
+                            border: `1px solid ${isCurrent ? colors[p-1] + '40' : isDone ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)'}`,
+                            color: isCurrent ? colors[p-1] : isDone ? '#555' : '#333',
+                          }}
+                        >
+                          <span>{emojis[p-1]}</span>
+                          <span>{isDone ? '✓ ' : ''}{labels[p-1]}</span>
+                        </div>
+                        {p < 3 && <div className="flex-1 h-px bg-white/5" />}
+                      </>
+                    );
+                  })}
+                </div>
+
+                {/* Current phase exercises */}
+                <div className="relative z-10">
+                  <div className="text-[9px] font-black text-neutral-500 uppercase tracking-widest mb-2">Phase {phaseData.phase} Exercises</div>
+                  <div className="space-y-1.5">
+                    {phaseData.exercises.map((ex) => (
+                      <div key={ex.name} className="flex items-start gap-2.5 bg-black/30 rounded-xl px-3 py-2 border border-white/4">
+                        <span className="text-[10px] font-black mt-0.5" style={{ color: phaseData.color }}>▸</span>
+                        <div>
+                          <div className="text-[11px] font-black text-white">{ex.name}</div>
+                          <div className="text-[9px] text-neutral-500 font-medium">{ex.note}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Upcoming milestones */}
+                <div className="mt-4 pt-4 border-t border-neutral-900 relative z-10">
+                  <div className="text-[9px] font-black text-neutral-500 uppercase tracking-widest mb-2">Phase Milestones</div>
+                  <div className="space-y-1.5">
+                    {phaseData.milestones.map((m) => {
+                      const isUnlocked = phaseData.phaseWeek >= m.week;
+                      return (
+                        <div key={m.week} className="flex items-center gap-2.5">
+                          <span
+                            className="text-[9px] font-black w-14 shrink-0"
+                            style={{ color: isUnlocked ? phaseData.color : '#444' }}
+                          >
+                            Wk {m.week}
+                          </span>
+                          <span
+                            className="text-[10px] font-medium"
+                            style={{ color: isUnlocked ? '#aaa' : '#444' }}
+                          >
+                            {isUnlocked ? '✅ ' : '○ '}{m.text}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Next phase teaser */}
+                {phaseData.nextPhase && (
+                  <div className="mt-4 pt-4 border-t border-neutral-900 relative z-10">
+                    <div className="text-[9px] font-black text-neutral-600 uppercase tracking-widest mb-1">Next Phase</div>
+                    <div className="text-[10px] text-neutral-600 font-medium">{phaseData.nextPhase}</div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {loading ? (
               <div className="text-center text-neutral-500 py-8 text-xs font-bold uppercase tracking-wider">Loading metrics...</div>
             ) : (
